@@ -1,0 +1,16 @@
+data:
+  symbol: "SYN_AAPL"
+  start: "2024-01-15T09:30:00Z"
+  end: "2024-01-15T10:30:00Z"
+  levels: 5
+  resolution: "ms"
+
+env:
+  trade_size: 100
+  impact_penalty: 0.0001
+  mark_to_market_k: 50       # steps ahead for adverse selection calc
+  hold_penalty: 0.0001
+
+training:
+  total_timesteps: 100000
+  n_envs: 4

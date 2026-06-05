@@ -6,21 +6,20 @@ import pandas as pd
 cfg = yaml.safe_load(open("config.yaml"))["data"]
 
 try:
-    from pulse import PulseClient
-    from utils import parse_lob_snapshot
+    from simudyne import PulseABM
 
     api_key = os.environ["PULSE_API_KEY"]
-    client = PulseClient(api_key=api_key)
+    client = PulseABM(api_key=api_key)
 
-    print(f"Fetching {cfg['symbol']} from Pulse API ...")
-    raw = client.get_orderbook(
-        symbol=cfg["symbol"],
-        start=cfg["start"],
-        end=cfg["end"],
-        levels=cfg["levels"],
-        resolution=cfg["resolution"],
-    )
-    df = parse_lob_snapshot(raw, levels=cfg["levels"])
+    print(f"Fetching cached simulation from Pulse API ...")
+    cached = client.simulation.list_cached()
+    
+    # Grab the first available cached simulation for this symbol
+    sim_id = cached["simulations"][0]["example_sim_id"]
+    polars_df = client.simulation.get_sim_data(sim_id)
+    
+    # Pulse API returns polars.DataFrame; convert to Pandas for the Gym environment
+    df = polars_df.to_pandas()
     print(f"Pulse API: ingested {len(df):,} ticks")
 
 except Exception as e:

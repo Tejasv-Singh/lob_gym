@@ -34,7 +34,7 @@ python -m venv .venv
 source .venv/bin/activate  # On Windows: .venv\Scripts\activate
 
 # Install requirements
-pip install pandas numpy gymnasium stable-baselines3 pyyaml matplotlib pyarrow fastparquet
+pip install pandas numpy gymnasium stable-baselines3 pyyaml matplotlib pyarrow polars simudyne-pulse
 ```
 
 ## Usage

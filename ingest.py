@@ -11,8 +11,8 @@ try:
     api_key = os.environ["PULSE_API_KEY"]
     client = PulseABM(api_key=api_key)
 
-    print(f"Fetching cached simulation from Pulse API ...")
-    cached = client.simulation.list_cached()
+    print(f"Fetching cached simulation for {cfg['symbol']} from Pulse API ...")
+    cached = client.simulation.list_cached(symbol=cfg['symbol'], date=cfg.get('cal_date'))
     
     # Grab the first available cached simulation for this symbol
     sim_id = cached["simulations"][0]["example_sim_id"]
@@ -37,6 +37,18 @@ except Exception as e:
     print(f"Synthetic: generated {len(df):,} ticks")
 
 os.makedirs("data", exist_ok=True)
+
+# Drop rows where the order book is empty (e.g. pre-market auction phase)
+df.dropna(subset=["ask_price_1", "bid_price_1"], inplace=True)
+
+# Fill sparse deeper levels with 0 so downstream math doesn't result in NaNs
+df.fillna(0, inplace=True)
+
+if "spread" not in df.columns:
+    df["spread"] = df["ask_price_1"] - df["bid_price_1"]
+if "mid_price" not in df.columns:
+    df["mid_price"] = (df["ask_price_1"] + df["bid_price_1"]) / 2
+
 df.to_parquet("data/lob_slice.parquet")
 print(f"Saved to data/lob_slice.parquet")
 print(f"  Spread mean: {df['spread'].mean():.5f}")

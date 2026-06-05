@@ -35,8 +35,23 @@ class LOBEnv(gym.Env):
         self._market_pressure = 0.0
 
         obs_dim = self.n_levels * 4 + 4
+        
+        low = np.zeros(obs_dim, dtype=np.float32)
+        high = np.zeros(obs_dim, dtype=np.float32)
+        
+        idx = 0
+        for _ in range(self.n_levels):
+            low[idx], high[idx] = -10.0, 10.0       # bid_rel
+            low[idx+1], high[idx+1] = 0.0, 1e6      # bid_size
+            low[idx+2], high[idx+2] = -10.0, 10.0   # ask_rel
+            low[idx+3], high[idx+3] = 0.0, 1e6      # ask_size
+            idx += 4
+            
+        low[idx:idx+4] = [-10.0, -1e6, -10.0, -10.0]
+        high[idx:idx+4] = [10.0, 1e6, 10.0, 10.0]
+
         self.observation_space = spaces.Box(
-            low=-10.0, high=10.0, shape=(obs_dim,), dtype=np.float32
+            low=low, high=high, dtype=np.float32
         )
         self.action_space = spaces.Box(
             low=np.array([-1.0, 0.0]),
